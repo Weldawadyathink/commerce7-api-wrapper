@@ -1,5 +1,4 @@
 import { fetcher } from "itty-fetcher";
-import "dotenv/config";
 
 interface C7CustomerPage {
   cursor?: string;
