@@ -1,9 +1,8 @@
 import { fetcher } from "itty-fetcher";
+import { C7Customers, C7CustomerType } from "./customer.js";
+import { C7Orders, C7OrderType } from "./order.js";
 
-interface C7CustomerPage {
-  cursor?: string;
-  customers: Array<any>;
-}
+export { C7OrderType, C7CustomerType };
 
 interface C7ApiOptions {
   tenant: string;
@@ -11,32 +10,10 @@ interface C7ApiOptions {
   password: string;
 }
 
-class C7Customers {
-  private api: ReturnType<typeof fetcher>;
-
-  constructor(api: ReturnType<typeof fetcher>) {
-    this.api = api;
-  }
-
-  async map(callback: (customer: any) => any) {
-    let cursor: string | undefined = "start";
-    let returnval: Array<any> = [];
-    while (cursor) {
-      const results: C7CustomerPage = await this.api.get(
-        `/customer?cursor=${cursor}`
-      );
-      cursor = results.cursor;
-      returnval = returnval.concat(
-        results.customers.map((customer) => callback(customer))
-      );
-    }
-    return returnval;
-  }
-}
-
 export class C7Api {
   private api: ReturnType<typeof fetcher>;
   customers: C7Customers;
+  orders: C7Orders;
 
   constructor(options: C7ApiOptions) {
     const auth = `Basic ${btoa(`${options.username}:${options.password}`)}`;
@@ -48,6 +25,6 @@ export class C7Api {
       },
     });
     this.customers = new C7Customers(this.api);
+    this.orders = new C7Orders(this.api);
   }
-
 }
