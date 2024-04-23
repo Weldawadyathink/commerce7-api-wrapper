@@ -303,6 +303,35 @@ interface C7OrdersPage {
   cursor?: string;
 }
 
+interface C7OrdersListOptions {
+  q?: string;
+  customerId?: string;
+  id?: string;
+  orderTagId?: string;
+  posProfileId?: string;
+  tagId?: string;
+  allocationId?: string;
+  queryId?: string;
+  updatedAt?: string;
+  orderPaidDate?: string;
+  orderFulfilledDate?: string;
+  orderSubmittedDate?: string;
+  fulfillmentStatus?:
+    | "Fulfilled"
+    | "Not Fulfulled"
+    | "Partially Fulfilled"
+    | "No Fulfillment Required";
+  complianceStatus?:
+    | "Compliant"
+    | "Forced"
+    | "Not Checked"
+    | "No Compliance Required"
+    | "Quarantined"
+    | "Void";
+  channel?: "Inbound" | "Outbound" | "Web" | "POS" | "Club" | "Marketplace";
+  orderDeliveryMethod?: "Pickup" | "Carry Out" | "Ship";
+}
+
 export class C7Orders {
   private api: ReturnType<typeof fetcher>;
 
@@ -310,18 +339,50 @@ export class C7Orders {
     this.api = api;
   }
 
-  async map(callback: (customer: any) => any) {
+  async id(orderId: string) {
+    const order: C7OrderType = await this.api.get(`/order/${orderId}`);
+    return order;
+  }
+
+  async *__call__(options: {
+    q?: string;
+    customerId?: string;
+    id?: string;
+    orderTagId?: string;
+    posProfileId?: string;
+    tagId?: string;
+    allocationId?: string;
+    queryId?: string;
+    updatedAt?: string;
+    orderPaidDate?: string;
+    orderFulfilledDate?: string;
+    orderSubmittedDate?: string;
+    fulfillmentStatus?:
+      | "Fulfilled"
+      | "Not Fulfulled"
+      | "Partially Fulfilled"
+      | "No Fulfillment Required";
+    complianceStatus?:
+      | "Compliant"
+      | "Forced"
+      | "Not Checked"
+      | "No Compliance Required"
+      | "Quarantined"
+      | "Void";
+    channel?: "Inbound" | "Outbound" | "Web" | "POS" | "Club" | "Marketplace";
+    orderDeliveryMethod?: "Pickup" | "Carry Out" | "Ship";
+  }) {
     let cursor: string | undefined = "start";
-    let returnval: Array<any> = [];
+    const params = new URLSearchParams(options);
     while (cursor) {
+      params.set("cursor", cursor);
       const results: C7OrdersPage = await this.api.get(
-        `/customer?cursor=${cursor}`
+        `/order?${params.toString()}`
       );
       cursor = results.cursor;
-      returnval = returnval.concat(
-        results.orders.map((customer) => callback(customer))
-      );
+      for (const order of results.orders) {
+        yield order;
+      }
     }
-    return returnval;
   }
 }

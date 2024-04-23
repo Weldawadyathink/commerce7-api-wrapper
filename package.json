@@ -1,6 +1,6 @@
 {
   "name": "commerce7-api-wrapper",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A lightweight wrapper for the Commerce7 API",
   "main": "./src/index.js",
   "scripts": {
